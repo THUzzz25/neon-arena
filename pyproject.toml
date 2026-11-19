@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "embodied-arena"
+version = "0.3.0"
+description = "MuJoCo G1 visual competition with a local multi-user submission portal"
+requires-python = ">=3.11"
+dependencies = ["mujoco==3.3.7", "numpy>=2.1,<3", "Pillow>=11"]
+
+[project.optional-dependencies]
+demo = ["onnxruntime>=1.20,<2"]
+test = ["pytest>=8", "fastapi==0.165.0", "uvicorn==0.54.0", "httpx==0.28.1"]
+web = ["fastapi==0.165.0", "uvicorn==0.54.0"]
+
+[project.scripts]
+embodied-arena = "embodied_arena.cli:main"
+arena-web = "embodied_arena.platform.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["embodied_arena*"]
+
+[tool.setuptools.package-data]
+"embodied_arena.platform" = ["static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
