@@ -111,7 +111,7 @@ def hiding_spots():
     return spots
 
 
-def city_targets(seed):
+def city_targets(seed,task_set='legacy'):
     rng=np.random.default_rng(seed)
     # Every district participates; different seeds choose different recesses.
     selected=[]
@@ -124,6 +124,11 @@ def city_targets(seed):
         selected.append({"id":f"city_target_{venue['id']}","owner":owner,"color":color,
             "text":f"进入{venue['title']}，找到并命中藏在内部的{color_cn}杯子。",**spot})
         selected[-1]["id"]=f"city_target_{venue['id']}"
+    if task_set=='mixed-v1':
+        from .objects import SHAPES,NAMES
+        for i,target in enumerate(selected):
+            target['shape']=SHAPES[(i+seed)%len(SHAPES)]
+            target['text']=target['text'].replace('杯子',NAMES[target['shape']])
     return selected
 
 

@@ -76,7 +76,7 @@ def inspect_package(archive, destination, settings):
                 raise PackageError("api_version 必须是整数 1。")
             if manifest.get("entry_point") != "policy:Policy":
                 raise PackageError("entry_point 必须为 policy:Policy；请在 policy.py 中定义 Policy。")
-            if manifest.get("environment") != settings.environment:
+            if manifest.get("environment") not in set(settings.available_environments)|{settings.environment}:
                 raise PackageError(f"当前可用环境为 {settings.environment}，请修改 environment。")
             if not isinstance(manifest.get("name"),str) or not 1 <= len(manifest["name"].strip()) <= 60:
                 raise PackageError("清单 name 需要 1–60 个字符。")

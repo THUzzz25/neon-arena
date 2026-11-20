@@ -8,3 +8,5 @@
 .badge,.job-sub,.table td.small,.table .button{font-size:.875rem}
 .stack{align-content:start}
 @media(pointer:coarse){.table .button{min-height:44px}}
+
+fieldset{min-width:0;border:1px solid var(--line);border-radius:12px;padding:1rem}legend{padding:0 .4rem;color:var(--muted)}.check-row{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;overflow-wrap:anywhere}figure{margin:1rem 0}figure svg{display:block;width:100%;height:auto;max-height:180px}

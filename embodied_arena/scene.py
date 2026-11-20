@@ -27,8 +27,12 @@ TARGETS = [
 def get_targets(config):
     if config.scene == "cyber_city":
         from .city import city_targets
-        return city_targets(config.seed)
-    return TARGETS
+        targets=city_targets(config.seed,config.task_set)
+    else:
+        targets=[dict(t) for t in TARGETS]
+    if config.spawn_swap:
+        targets=[{**t,'owner':None if t['owner'] is None else 1-t['owner']} for t in targets]
+    return targets
 
 
 def _numbers(values):
@@ -84,9 +88,9 @@ def build_xml(config: MatchConfig, count: int = 2, room: bool = True) -> str:
                 element.set("group", "4" if element.get("class") == "visual" else str(pid + 1))
         if is_city:
             from .city import SPAWNS
-            spawn=SPAWNS[pid]
+            spawn=SPAWNS[1-pid if config.spawn_swap else pid]
         else:
-            spawn=[-1.5, -1.1 if pid == 0 else 1.1, .79] if room else [0, 0, .79]
+            spawn=[-1.5, -1.1 if (1-pid if config.spawn_swap else pid) == 0 else 1.1, .79] if room else [0, 0, .79]
         robot.set("pos", _numbers(spawn))
         torso = next(b for b in robot.iter("body") if b.get("name") == prefix + "torso_link")
         ET.SubElement(torso, "camera", name=prefix + "eye", pos=".12 0 .30", xyaxes="0 -1 0 0 0 1", fovy="70")
@@ -131,9 +135,11 @@ def build_xml(config: MatchConfig, count: int = 2, room: bool = True) -> str:
         for target, position in placements:
             body = ET.SubElement(world, "body", name=target["id"], pos=_numbers(position))
             rgba = _numbers(COLORS[target["color"]])
-            ET.SubElement(body, "geom", name=target["id"] + "/body", type="cylinder", size=".10 .13", rgba=rgba)
-            for index, (start, end) in enumerate([([0, .10, -.07], [0, .18, -.07]), ([0, .18, -.07], [0, .18, .07]), ([0, .18, .07], [0, .10, .07])]):
-                ET.SubElement(body, "geom", name=f"{target['id']}/handle{index}", type="capsule", fromto=_numbers([*start, *end]), size=".018", rgba=rgba)
+            from .objects import add_shape
+            add_shape(body,target['id'],target.get('shape','cup'),rgba)
+    if is_city and config.task_set=='mixed-v1':
+        from .objects import distractors
+        distractors(world,config)
     return ET.tostring(root, encoding="unicode")
 
 

@@ -1,0 +1,7 @@
+FROM neon-arena-policy:1
+USER root
+RUN pip install --no-cache-dir torch==2.7.0 --index-url https://download.pytorch.org/whl/cu128
+RUN pip uninstall -y onnxruntime && pip install --no-cache-dir onnxruntime-gpu==1.32.0
+LABEL org.neon-arena.environment="arena-cuda-v1"
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.13/site-packages/nvidia/cudnn/lib:/usr/local/lib/python3.13/site-packages/nvidia/cublas/lib:/usr/local/lib/python3.13/site-packages/nvidia/cuda_runtime/lib
+USER 65532:65532

@@ -5,14 +5,14 @@ Set-Location -LiteralPath (Split-Path -Parent $PSScriptRoot)
 Write-Output '[1/4] Preparing Python environment...'
 if (-not (Test-Path -LiteralPath '.venv\Scripts\python.exe')) {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        & py -3 -m venv .venv
+        & py -3.13 -m venv .venv
     } else {
         & python -m venv .venv
     }
-    if ($LASTEXITCODE -ne 0) { throw 'Python environment creation failed. Python 3.13 is recommended.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Install Python 3.13 and retry environment creation.' }
 }
 $arenaPython = (Resolve-Path '.venv\Scripts\python.exe').Path
-& $arenaPython -c "import sys; assert sys.version_info >= (3,11), 'Python 3.11+ is required; 3.13 is recommended'"
+& $arenaPython -c "import sys; assert sys.version_info[:2] == (3,13), 'The pinned Windows environment requires Python 3.13'"
 if ($LASTEXITCODE -ne 0) { throw 'Unsupported Python version.' }
 
 Write-Output '[2/4] Installing pinned platform dependencies...'

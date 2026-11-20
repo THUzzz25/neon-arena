@@ -36,7 +36,7 @@ def probe(settings):
         label=(details.get("Config",{}).get("Labels") or {}).get("org.neon-arena.environment")
         if label!=settings.environment:
             return {**base,"message":"策略镜像环境标识不匹配，停止执行。"}
-        return {**base,"ready":True,"image_id":details["Id"],"message":"CPU 隔离执行环境就绪，每名选手使用独立实例。"}
+        return {**base,"ready":True,"image_id":details["Id"],"gpu":settings.gpu,"message":("GPU" if settings.gpu else "CPU")+" 隔离执行环境就绪，每名选手使用独立实例。"}
     except (OSError,subprocess.TimeoutExpired,ValueError,KeyError) as e:
         return {**base,"message":"执行节点未连接，上传与静态检查仍可使用。","diagnostic":str(e)[:250]}
 
@@ -47,6 +47,9 @@ class Agent:
         self.responses=queue.Queue(maxsize=4)
         self.logs=bytearray()
         self.closed=False
+        from .wirecache import ObservationCache
+        self.cache=ObservationCache()
+        self.transport={'bytes':0,'visual_cache_hits':0,'task_cache_hits':0}
         self.write_lock=threading.Lock()
         self.outgoing=queue.Queue(maxsize=1)
         args=[docker_path(),"run","--rm","-i","--name",self.name,
@@ -58,7 +61,10 @@ class Agent:
               "--log-driver","none","--mount",f"type=bind,source={Path(folder).resolve()},target=/submission,readonly",
               "--env","HOME=/tmp","--env","OMP_NUM_THREADS=1","--env","OPENBLAS_NUM_THREADS=1",
               "--env","PYTHONDONTWRITEBYTECODE=1","--entrypoint","python",image_id,"-I","-B","-c",
-              Path(__file__).with_name("preflight.py").read_text(encoding="utf-8")]
+              Path(__file__).with_name("preflight.py").read_text(encoding="utf-8").replace('runpy.run_path("/runtime/agent.py", run_name="__main__")',
+                  'exec('+repr(Path(__file__).with_name('agent.py').read_text(encoding='utf-8'))+", {'__name__':'__main__'})")]
+        if settings.gpu:
+            args[2:2]=['--gpus','all','--env','ARENA_GPU=1']
         self.process=subprocess.Popen(args,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
                                       creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
         self.reader=threading.Thread(target=self._read,daemon=True)
@@ -89,9 +95,14 @@ class Agent:
                 del self.logs[:-32768]
 
     def send(self,message):
+        message,next_cache=self.cache.prepare(message)
         raw=dumps(message)
         try:
             self.outgoing.put_nowait(raw)
+            self.cache.commit(next_cache)
+            self.transport['bytes']+=len(raw)
+            self.transport['visual_cache_hits']+=int(message.get('reuse_visual',False))
+            self.transport['task_cache_hits']+=int(message.get('reuse_tasks',False))
             return True
         except queue.Full:
             return False
@@ -141,6 +152,7 @@ class IsolatedPool:
         self.pending=[None,None]
         self.last=[{"joint_targets":q.copy(),"fire":False} for q in homes]
         self.events=[]
+        self.latencies=[[],[]]
         self.request_id=0
         self.dead=[False,False]
         self.joint_orders=joint_orders or [None,None]
@@ -171,7 +183,8 @@ class IsolatedPool:
     def act(self,observations,strict=False):
         self.request_id+=1
         rid=self.request_id
-        deadline=time.monotonic()+self.settings.act_timeout
+        sent_at=time.monotonic()
+        deadline=sent_at+self.settings.act_timeout
         result=[{"joint_targets":a["joint_targets"],"fire":False} for a in self.last]
         for pid,agent in enumerate(self.agents):
             if self.dead[pid]:
@@ -218,6 +231,7 @@ class IsolatedPool:
                 result[pid]=validate_action(response.get("action"))
                 result[pid]["joint_targets"]=reorder(result[pid]["joint_targets"],self.joint_orders[pid],observations[pid]["proprio"]["joint_names"])
                 self.last[pid]=result[pid]
+                self.latencies[pid].append((time.monotonic()-sent_at)*1000)
             except Exception as e:
                 self.events.append({"type":"policy_timeout" if isinstance(e,TimeoutError) else "policy_error","player":pid,"message":str(e)[:1500]})
                 if strict:

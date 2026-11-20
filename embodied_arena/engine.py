@@ -17,7 +17,10 @@ from .rules import Hit, Referee, Target
 from .scene import COLORS, get_targets, make_world
 
 
-def reference_image(color: str):
+def reference_image(color: str,shape='cup'):
+    if shape!='cup':
+        from .objects import reference
+        return reference(shape,tuple(int(channel*255) for channel in COLORS[color][:3]))
     image = Image.new("RGB", (96, 96), (225, 225, 225))
     draw = ImageDraw.Draw(image)
     rgb = tuple(int(channel * 255) for channel in COLORS[color][:3])
@@ -44,7 +47,7 @@ class Arena:
         self.render_options.geomgroup[:] = [1, 0, 0, 1, 1, 1]
         self.render_options.sitegroup[:] = 0
         self.images: dict[int, tuple] = {}
-        self.references = {t["id"]: reference_image(t["color"]) for t in self.targets}
+        self.references = {t["id"]: reference_image(t["color"],t.get('shape','cup')) for t in self.targets}
         self.frame = 0
         self.reset_counts = [0, 0]
         self.last_targets = [r.home.copy() for r in self.robots]
@@ -63,6 +66,7 @@ class Arena:
                 self.renderer = mujoco.Renderer(self.model, self.config.height, self.config.width)
             self.renderer.disable_depth_rendering()
             self.renderer.update_scene(self.data, camera=self.robots[pid].camera, scene_option=self.render_options)
+            self.renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW]=self.config.render_shadows
             rgb = self.renderer.render().copy()
             self.renderer.enable_depth_rendering()
             depth = self.renderer.render().copy()

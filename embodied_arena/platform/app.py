@@ -78,7 +78,13 @@ def create_app(settings:Settings|None=None):
     mimetypes.add_type("image/svg+xml",".svg")
     settings=settings or Settings.from_env()
     store=Store(settings.data)
+    from .competition import upgrade
+    from .environments import initialize,RuntimeCatalog
+    from .operations import Operations
+    upgrade(store);initialize(store,settings)
+    ops=Operations(store,settings);catalog=RuntimeCatalog(store,settings)
     controller=CompetitionQueue(store,settings)
+    catalog.controller=controller
     deployer=DeploymentManager(store,settings,controller)
     attempts=defaultdict(deque)
     upload_slots=set()
@@ -102,15 +108,18 @@ def create_app(settings:Settings|None=None):
             raise RuntimeError("此数据目录已经有平台服务运行，请使用已有页面") from None
         if settings.workers:
             controller.start()
+            ops.start()
         try:
             yield
         finally:
             deployer.close()
+            ops.close()
             controller.close()
             lock.close()
 
     app=FastAPI(title="Neon Arena",docs_url=None,redoc_url=None,openapi_url=None,lifespan=lifespan)
     app.state.store=store;app.state.queue=controller;app.state.settings=settings;app.state.deployer=deployer
+    app.state.ops=ops;app.state.catalog=catalog
     app.add_middleware(TrustedHostMiddleware,allowed_hosts=allowed_hosts())
 
     @app.middleware("http")
@@ -184,7 +193,7 @@ def create_app(settings:Settings|None=None):
         return job
 
     def public_job(job,user):
-        item={k:job[k] for k in ("id","kind","state","progress","duration","scene","created","started","finished","published")}
+        item={k:job[k] for k in ("id","kind","state","progress","duration","scene","created","started","finished","published","artifacts_expired","attempts","environment","tournament_id")}
         item["message"]=job["message"] if user["role"]=="admin" or job["user_id"]==user["id"] or job["kind"]!="official" else {"failed":"运行异常，请联系管理员","completed":"比赛完成","running":"仿真运行中"}.get(job["state"],"等待管理员安排")
         item["result"]=json.loads(job["result"]) if job["result"] else None
         item["players"]=[store.one("SELECT u.username,s.name,s.revision FROM submissions s JOIN users u ON u.id=s.user_id WHERE s.id=?",(job[key],)) for key in ("submission_a","submission_b")]
@@ -195,14 +204,17 @@ def create_app(settings:Settings|None=None):
         return item
 
     def insert_job(db,kind,owner,a,b,scene,duration,auto_practice=False):
+        environments=[db.execute('SELECT environment FROM submissions WHERE id=?',(key,)).fetchone()[0] for key in (a,b)]
+        if environments[0]!=environments[1]:raise HTTPException(409,'对局双方必须使用相同运行环境')
         job_id=uuid.uuid4().hex
         db.execute("INSERT INTO jobs (id,kind,user_id,submission_a,submission_b,state,message,duration,scene,seed,created,auto_practice) VALUES (?,?,?,?,?,'queued',?,?,?,?,?,?)",
                    (job_id,kind,owner,a,b,"等待执行节点" if not controller.node.get("ready") else "已加入队列",duration,scene,secrets.randbelow(2**31),time.time(),int(auto_practice)))
+        db.execute("UPDATE jobs SET environment=?,task_set='mixed-v1' WHERE id=?",(environments[0],job_id))
         return job_id
 
     @app.get("/api/status")
     def status():
-        return {"setup_required":not bool(store.one("SELECT id FROM users WHERE role='admin' LIMIT 1")),"name":"Neon Arena","version":"0.3.0"}
+        return {"setup_required":not bool(store.one("SELECT id FROM users WHERE role='admin' LIMIT 1")),"name":"Neon Arena","version":"0.4.0"}
 
     @app.post("/api/setup")
     def setup(body:Credentials,request:Request,response:Response):
@@ -262,8 +274,13 @@ def create_app(settings:Settings|None=None):
         return {"node":node,"limits":settings.limits(),"joint_names":calibration["dof_names"],"robot":descriptor(),"practice_paused":store.setting("practice_paused")=="1"}
 
     @app.get("/api/template")
-    def template(user=Depends(actor)):
-        return Response(template_zip(settings.environment),media_type="application/zip",headers={"Content-Disposition":'attachment; filename="arena-submission-template.zip"'})
+    def template(kind:Literal['minimal','walking']='minimal',environment:str|None=None,user=Depends(actor)):
+        selected=environment or settings.environment
+        if not store.one('SELECT id FROM environments WHERE id=?',(selected,)):raise HTTPException(400,'运行环境尚未发布')
+        from .starter import walking_zip
+        try:content=walking_zip(selected) if kind=='walking' else template_zip(selected)
+        except FileNotFoundError as error:raise HTTPException(409,str(error)) from None
+        return Response(content,media_type="application/zip",headers={"Content-Disposition":'attachment; filename="arena-submission-template.zip"'})
 
     @app.get("/api/submissions")
     def submissions(user=Depends(actor)):
@@ -297,7 +314,7 @@ def create_app(settings:Settings|None=None):
                     output.write(chunk)
             report=[];state="waiting_check";manifest={"name":name or "未命名提交","environment":settings.environment}
             try:
-                inspection_settings=replace(settings,expanded_bytes=min(settings.expanded_bytes,max(0,settings.user_bytes-usage["total"]-total)))
+                inspection_settings=replace(settings,available_environments=tuple(r['id'] for r in store.all('SELECT id FROM environments')),expanded_bytes=min(settings.expanded_bytes,max(0,settings.user_bytes-usage["total"]-total)))
                 manifest,report=await run_in_threadpool(inspect_package,archive,settings.data/"submissions"/upload_id,inspection_settings)
                 if total+usage["total"]+manifest["_expanded_bytes"]>settings.user_bytes:
                     raise PackageError("解压后超过账号总存储上限，请联系管理员清理历史数据")
@@ -309,7 +326,7 @@ def create_app(settings:Settings|None=None):
             with store.connect(write=True) as db:
                 revision=db.execute("SELECT COALESCE(max(revision),0)+1 FROM submissions WHERE user_id=?",(user["id"],)).fetchone()[0]
                 db.execute("INSERT INTO submissions (id,user_id,revision,name,description,sha256,bytes,expanded_bytes,environment,state,report,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                           (upload_id,user["id"],revision,name.strip() or manifest["name"],description,file_digest(archive),total,manifest.get("_expanded_bytes",0),settings.environment,state,json.dumps(report,ensure_ascii=False),time.time()))
+                           (upload_id,user["id"],revision,name.strip() or manifest["name"],description,file_digest(archive),total,manifest.get("_expanded_bytes",0),manifest.get('environment',settings.environment),state,json.dumps(report,ensure_ascii=False),time.time()))
                 if state=="waiting_check":
                     check_id=insert_job(db,"check",user["id"],upload_id,upload_id,"room",1.,auto_practice=auto_practice)
             controller.wake.set()
@@ -512,6 +529,7 @@ def create_app(settings:Settings|None=None):
 
     @app.post("/api/admin/deploy")
     def deploy(user=Depends(administrator)):
+        if catalog.building:raise HTTPException(409,'模型运行环境正在准备，请等待完成')
         if store.one("SELECT count(*) AS n FROM jobs WHERE state IN ('preparing','running')")["n"]:
             raise HTTPException(409,"当前有场次正在运行，请等待结束后部署，已有队列会保留")
         started=deployer.start()
@@ -554,6 +572,8 @@ def create_app(settings:Settings|None=None):
         return {"ok":True}
 
     static=Path(__file__).parent/"static"
+    from .extensions import install
+    install(app,store,settings,controller,ops,catalog,actor,administrator,job_for,public_job)
     app.mount("/static",StaticFiles(directory=static),name="static")
 
     @app.get("/")

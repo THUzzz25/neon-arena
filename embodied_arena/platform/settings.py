@@ -29,6 +29,11 @@ class Settings:
     practice_duration: float = 60.0
     workers: bool = True
     secure_cookie: bool = False
+    gpu: bool = False
+    available_environments: tuple[str,...] = ('arena-python-v1',)
+    retention_days: int = 30
+    backup_keep: int = 7
+    backup_interval: float = 86400.
 
     @classmethod
     def from_env(cls):

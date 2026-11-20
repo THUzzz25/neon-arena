@@ -9,6 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 @dataclass(frozen=True)
 class MatchConfig:
     scene: str = "cyber_city"
+    task_set: str = "legacy"
+    spawn_swap: bool = False
+    render_shadows: bool = True
     duration: float = 60.0
     seed: int = 7
     physics_dt: float = 0.002
@@ -35,12 +38,14 @@ class MatchConfig:
     def __post_init__(self):
         if self.scene not in ("room", "cyber_city"):
             raise ValueError("scene must be room or cyber_city")
+        if self.task_set not in ('legacy','mixed-v1') or type(self.spawn_swap) is not bool or type(self.render_shadows) is not bool:
+            raise ValueError('Invalid task set or spawn configuration')
         if not isinstance(self.traffic_enabled, bool):
             raise ValueError("traffic_enabled must be a bool")
         if not isinstance(self.seed, int) or self.seed < 0:
             raise ValueError("seed must be a nonnegative integer")
         for name, value in asdict(self).items():
-            if name in ("scene", "traffic_enabled"):
+            if name in ("scene", "traffic_enabled", "task_set", "spawn_swap", "render_shadows"):
                 continue
             if not math.isfinite(value) or (name != "seed" and value <= 0):
                 raise ValueError(f"Invalid config value {name}={value}")

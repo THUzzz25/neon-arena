@@ -2,15 +2,15 @@ $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path -LiteralPath '.venv/Scripts/python.exe')) {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        & py -3 -m venv .venv
+        & py -3.13 -m venv .venv
     } else {
         & python -m venv .venv
     }
     if ($LASTEXITCODE -ne 0) { throw 'Failed to create Python environment.' }
 }
 $arenaPython = Join-Path (Get-Location) '.venv/Scripts/python.exe'
-& $arenaPython -c "import sys; assert sys.version_info >= (3,11), 'Python 3.11+ is required'"
-if ($LASTEXITCODE -ne 0) { throw 'Python 3.11+ is required.' }
+& $arenaPython -c "import sys; assert sys.version_info[:2] == (3,13), 'The pinned Windows environment requires Python 3.13'"
+if ($LASTEXITCODE -ne 0) { throw 'Python 3.13 is required for this launcher.' }
 & $arenaPython -m pip install -e '.[demo,web,test]'
 if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
 & $arenaPython scripts/fetch_assets.py
