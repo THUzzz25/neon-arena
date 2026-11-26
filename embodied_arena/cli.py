@@ -5,7 +5,7 @@ from pathlib import Path
 import time
 import json
 import math
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 
 import mujoco
 import numpy as np
@@ -15,6 +15,7 @@ from .display import composite, save_gif
 from .engine import Arena
 from .workers import PolicyPool, load_policy
 from .viewer import passive_viewer
+from .simple_viewer import simple_viewer
 
 
 DEFAULT_POLICY = "embodied_arena.policies:DiagnosticVision"
@@ -22,6 +23,37 @@ CITY_CAMERAS=["city_hero","street","inside_chapel","inside_market","inside_charg
 CITY_EXTRA_CAMERAS={ord('N'):"night_market",ord('D'):"drone_sky",ord('P'):"park_trees",ord('W'):"west_plaza",
                     ord('S'):"inside_station",ord('T'):"inside_tea",ord('F'):"inside_noodle",ord('G'):"inside_arcade",ord('H'):"skyline",
                     ord('U'):"living_street",ord('K'):"food_street",ord('L'):"hotel_front",ord('J'):"junction",ord('B'):"neon_street"}
+
+
+@contextmanager
+def _spectator_viewer(model, data, camera, render_mode, key_callback):
+    if render_mode == "simple":
+        with simple_viewer(model, data, camera=camera) as viewer:
+            yield viewer
+    else:
+        with passive_viewer(model, data, key_callback=key_callback) as viewer:
+            with viewer.lock():
+                viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
+                viewer.cam.fixedcamid = model.camera(camera).id
+                viewer.opt.geomgroup[:] = [1,0,0,1,1,0 if camera in ("overview","aerial") else 1]
+                viewer.opt.sitegroup[:] = 0
+            yield viewer
+
+
+def _wait_until(viewer, render_mode, deadline):
+    """Keep the caller-thread window interactive while pacing playback."""
+    if viewer is None or render_mode != "simple":
+        delay = deadline - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        return viewer is None or viewer.is_running()
+    while viewer.is_running():
+        delay = deadline - time.monotonic()
+        if delay <= 0:
+            return True
+        time.sleep(min(delay, 1 / 60))
+        viewer.sync()
+    return False
 
 
 def run(args):
@@ -35,6 +67,7 @@ def run(args):
     public_config=asdict(config)
     public_config.pop("seed",None)
     camera=args.camera or ("city_hero" if config.scene=="cyber_city" else "overview")
+    render_mode=getattr(args,"render_mode","simple")
     pending_camera=[]
     def camera_key(key):
         if config.scene=="cyber_city" and ord('0')<=key<=ord('9'):
@@ -51,13 +84,8 @@ def run(args):
         else:
             pool = PolicyPool(specs,public_config,[r.home for r in arena.robots],timeout=args.timeout)
         if args.viewer:
-            import mujoco.viewer
-            viewer = windows.enter_context(passive_viewer(arena.model,arena.data,key_callback=camera_key))
-            with viewer.lock():
-                viewer.cam.type = mujoco.mjtCamera.mjCAMERA_FIXED
-                viewer.cam.fixedcamid = arena.model.camera(camera).id
-                viewer.opt.geomgroup[:] = [1,0,0,1,1,0 if camera in ("overview","aerial") else 1]
-                viewer.opt.sitegroup[:] = 0
+            viewer = windows.enter_context(_spectator_viewer(
+                arena.model,arena.data,camera,render_mode,camera_key))
         last_print = last_snapshot = -1
         real_start = time.monotonic()
         for _ in range(math.ceil(config.duration/config.control_dt)):
@@ -74,7 +102,7 @@ def run(args):
             if viewer:
                 if not viewer.is_running():
                     break
-                if pending_camera:
+                if render_mode=="debug" and pending_camera:
                     camera=pending_camera[-1];pending_camera.clear()
                     with viewer.lock():
                         viewer.cam.type=mujoco.mjtCamera.mjCAMERA_FIXED
@@ -82,7 +110,7 @@ def run(args):
                         viewer.opt.geomgroup[5]=0 if camera in ("overview","aerial") else 1
                 viewer.set_texts((None,None,"Time\nP1 score / HP\nP2 score / HP",
                     f"{arena.time:.1f} / {config.duration:g}\n{arena.referee.players[0].score:g} / {arena.referee.players[0].health:g}\n{arena.referee.players[1].score:g} / {arena.referee.players[1].health:g}"))
-                if config.scene=="cyber_city":
+                if render_mode=="debug" and config.scene=="cyber_city":
                     viewer.set_texts([
                         (None,None,"Time\nP1 score / HP\nP2 score / HP",f"{arena.time:.1f} / {config.duration:g}\n{arena.referee.players[0].score:g} / {arena.referee.players[0].health:g}\n{arena.referee.players[1].score:g} / {arena.referee.players[1].health:g}"),
                         (mujoco.mjtFontScale.mjFONTSCALE_100,mujoco.mjtGridPos.mjGRID_BOTTOMLEFT,
@@ -97,9 +125,8 @@ def run(args):
                 frame = composite(arena)
                 frames.append(frame.resize((720,570)))
             if args.realtime:
-                delay = arena.time - (time.monotonic()-real_start)
-                if delay>0:
-                    time.sleep(delay)
+                if not _wait_until(viewer,render_mode,real_start + arena.time):
+                    break
         result = arena.save(output)
         (output/"submissions.json").write_text(json.dumps({"policies":specs,"runner":"inline" if args.inline else "independent_processes"},indent=2),encoding="utf-8")
         if not args.no_preview:
@@ -118,11 +145,11 @@ def run(args):
 
 def replay(args):
     from .scene import load_model
-    import mujoco.viewer
     directory = Path(args.directory)
     xml=(directory/"scene.xml").read_text(encoding="utf-8")
     model = load_model(xml)
     camera=args.camera or ("city_hero" if "city_sky" in xml else "overview")
+    render_mode=getattr(args,"render_mode","simple")
     pending_camera=[]
     def camera_key(key):
         if "city_sky" in xml and ord('0')<=key<=ord('9'):
@@ -133,12 +160,7 @@ def replay(args):
                 pending_camera.append(name)
     data = mujoco.MjData(model)
     with np.load(directory/"trajectory.npz",allow_pickle=False) as record:
-        with passive_viewer(model,data,key_callback=camera_key) as viewer:
-            with viewer.lock():
-                viewer.cam.type=mujoco.mjtCamera.mjCAMERA_FIXED
-                viewer.cam.fixedcamid=model.camera(camera).id
-                viewer.opt.geomgroup[:]=[1,0,0,1,1,0 if camera in ("overview","aerial") else 1]
-                viewer.opt.sitegroup[:]=0
+        with _spectator_viewer(model,data,camera,render_mode,camera_key) as viewer:
             stride=max(1,round(args.speed))
             indices=list(range(0,len(record["time"]),stride))
             if indices[-1]!=len(record["time"])-1:
@@ -147,7 +169,7 @@ def replay(args):
             for index in indices:
                 if not viewer.is_running():
                     break
-                if pending_camera:
+                if render_mode=="debug" and pending_camera:
                     camera=pending_camera[-1];pending_camera.clear()
                     with viewer.lock():
                         viewer.cam.type=mujoco.mjtCamera.mjCAMERA_FIXED
@@ -164,7 +186,8 @@ def replay(args):
                 mujoco.mj_forward(model,data)
                 viewer.set_texts((None,None,"REPLAY\nTime\nP1 score / HP\nP2 score / HP",f"\n{t:.2f}\n{stats[0,1]:g} / {stats[0,0]:g}\n{stats[1,1]:g} / {stats[1,0]:g}"))
                 viewer.sync()
-                time.sleep(max(0.,float(t)/args.speed-(time.monotonic()-replay_start)))
+                if not _wait_until(viewer,render_mode,replay_start + float(t)/args.speed):
+                    break
 
 
 def main():
@@ -181,6 +204,8 @@ def main():
     r.add_argument("--policy-b")
     r.add_argument("--timeout",type=float,default=1.)
     r.add_argument("--viewer",action="store_true")
+    r.add_argument("--render-mode",choices=["simple","debug"],default="simple",
+                   help="Viewer layout: simple camera buttons (default), or full MuJoCo debug panels")
     r.add_argument("--realtime",action="store_true")
     r.add_argument("--inline",action="store_true",help="Trusted debug only; runs policies in parent")
     r.add_argument("--no-cameras",action="store_true",help="Physics/rule diagnostics only")
@@ -190,6 +215,8 @@ def main():
     p.add_argument("directory")
     p.add_argument("--speed",type=float,default=1.)
     p.add_argument("--camera")
+    p.add_argument("--render-mode",choices=["simple","debug"],default="simple",
+                   help="Viewer layout: simple camera buttons (default), or full MuJoCo debug panels")
     args=parser.parse_args()
     if getattr(args,"speed",1)<=0 or getattr(args,"timeout",1)<=0:
         parser.error("speed and timeout must be positive")

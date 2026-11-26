@@ -157,7 +157,17 @@ node scripts\check_platform_browser.mjs
 # 原生仿真与轨迹回放
 .\.venv\Scripts\python.exe -m embodied_arena run --viewer --realtime
 .\.venv\Scripts\python.exe -m embodied_arena replay artifacts\latest
+
+# 完整 MuJoCo 调试界面
+.\.venv\Scripts\python.exe -m embodied_arena run --viewer --realtime --render-mode debug
+.\.venv\Scripts\python.exe -m embodied_arena replay artifacts\latest --render-mode debug
 ```
+
+原生窗口默认使用**精简渲染模式**（`--render-mode simple`）：移除两侧调试面板，保留比赛时间、得分与生命值，以及「选手 1 视角」「选手 2 视角」「全局视角」「跟随选手 1」「跟随选手 2」五个可点击按钮。选手视角使用机器人眼部摄像头，跟随视角从第三人称追踪对应机器人；全局视角保留当前场景默认镜头，也可用 `--camera` 指定。实时比赛和轨迹回放均支持。双击 `启动演示.cmd`、`启动房间演示.cmd` 或 `启动回放.cmd` 即可使用精简模式。
+
+按钮依次显示 `P1 VIEW`、`P2 VIEW`、`GLOBAL`、`FOLLOW P1`、`FOLLOW P2`，对应快捷键 **1–5**；按 **Esc** 关闭窗口。慢速回放等待期间也可以切换视角和关闭窗口。
+
+需要两侧选项、自由调试和城市镜头快捷键时，使用 `--render-mode debug` 切回原生 MuJoCo 界面。`run` 仍需传入 `--viewer` 才会打开窗口。
 
 完整 60 秒城市对局与循环赛验收使用 `python scripts/validate_release.py`，报告写入 `artifacts/release_validation/latest.json`。
 

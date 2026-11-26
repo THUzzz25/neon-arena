@@ -18,6 +18,10 @@ Linux/macOS 将 `.venv/Scripts/python.exe` 换成 `.venv/bin/python`。也可以
 
 默认运行 5 仿真秒的小房间，两个独立 `Policy` 实例对局，开启真实 RGB-D，不弹窗口。终端打印分数、生命值与结果目录。默认策略只保持初始关节目标，是可运行接口示例，不保证站立、行走或得分；零分平局是正常结果。
 
+`--viewer` 默认打开精简渲染窗口：无两侧调试面板，通过五个按钮切换选手 1 视角、选手 2 视角、全局视角、跟随选手 1 和跟随选手 2。选手视角使用眼部摄像头，跟随视角从第三人称追踪机器人。需要原生 MuJoCo 选项时加 `--render-mode debug`；`--replay` 回放也支持此选项。
+
+按钮 `P1 VIEW`、`P2 VIEW`、`GLOBAL`、`FOLLOW P1`、`FOLLOW P2` 依次对应快捷键 **1–5**，按 **Esc** 关闭窗口；慢速回放等待期间仍可操作。
+
 ## 修改策略
 
 只需编辑 `policy.py` 中的 `Policy.act(observation)`。构造参数为 `player_id=0, config=None`。

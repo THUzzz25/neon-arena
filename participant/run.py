@@ -25,6 +25,8 @@ def main(argv=None):
     parser.add_argument("--policy", default="policy:Policy", help="自己的 模块:类名")
     parser.add_argument("--opponent", default="policy:Policy", help="对手 模块:类名（独立实例）")
     parser.add_argument("--viewer", action="store_true", help="打开实时仿真窗口")
+    parser.add_argument("--render-mode", choices=["simple", "debug"], default="simple",
+                        help="窗口模式：simple 精简视角按钮（默认），debug 完整 MuJoCo 调试面板")
     parser.add_argument("--no-cameras", action="store_true", help="关闭 RGB-D 和预览，仅检查物理链路")
     parser.add_argument("--output", type=Path, help="结果目录，必须不存在或为空")
     parser.add_argument("--replay", type=Path, help="回放已保存的结果目录")
@@ -36,7 +38,8 @@ def main(argv=None):
     from embodied_arena import cli
 
     if args.replay:
-        cli.replay(argparse.Namespace(directory=args.replay.resolve(), speed=args.speed, camera=None))
+        cli.replay(argparse.Namespace(directory=args.replay.resolve(), speed=args.speed,
+                                      camera=None, render_mode=args.render_mode))
         return 0
 
     output = (args.output or ROOT / "outputs" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")).resolve()
@@ -46,7 +49,7 @@ def main(argv=None):
     cli.run(argparse.Namespace(
         config=None, duration=args.duration, seed=args.seed, scene=args.scene,
         output=str(output), policy_a=args.policy, policy_b=args.opponent,
-        camera=None, inline=True, viewer=args.viewer, realtime=args.viewer,
+        camera=None, inline=True, viewer=args.viewer, realtime=args.viewer, render_mode=args.render_mode,
         no_cameras=args.no_cameras, no_preview=args.no_cameras, gif=False,
         timeout=1.0,
     ))
