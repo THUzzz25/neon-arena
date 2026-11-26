@@ -122,9 +122,15 @@ class Arena:
                 return Hit("target", target["id"])
         return Hit("miss")
 
-    def step(self, actions: list[dict]):
+    def step(self, actions: list[dict]) -> tuple[list[float], bool]:
+        """Advance one control step and return (rewards, done).
+
+        rewards[pid] is that player's raw score increase during this step,
+        without shaping or normalization. The final step also returns rewards.
+        """
         if len(actions) != len(self.robots):
             raise ValueError("Exactly one action per player is required")
+        previous_scores = [player.score for player in self.referee.players]
         shots = {}
         for pid, action in enumerate(actions):
             robot = self.robots[pid]
@@ -175,7 +181,10 @@ class Arena:
             self.motion.update(self.data,self.time)
         mujoco.mj_forward(self.model, self.data)
         self.record()
-        return self.time + 1e-9 >= self.config.duration
+        rewards = [player.score - previous for player, previous in
+                   zip(self.referee.players, previous_scores, strict=True)]
+        done = self.time + 1e-9 >= self.config.duration
+        return rewards, done
 
     def record(self):
         self.traces.append((self.time, self.data.qpos.copy(), self.data.qvel.copy(), self.data.ctrl.copy(),

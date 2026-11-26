@@ -46,6 +46,19 @@ Python `模块名:类名`，构造签名 `__init__(player_id=0, config=None)`，
 
 当前仿真采用固定动作周期 0.02 秒，图像每 0.10 秒更新一次。较慢的视觉模型应在策略内部缓存结果，由较快的运控循环继续生成关节目标。策略必须自行考虑倒地后的起身，平台只在超时后强制复位。
 
+## 本地环境步进与原始奖励
+
+直接调用仿真环境时，`Arena.step(actions) -> tuple[list[float], bool]` 返回本步奖励与结束标记：
+
+```python
+rewards, done = arena.step([action_player_0, action_player_1])
+next_observations = [arena.observation(pid) for pid in range(2)]
+```
+
+`rewards[pid]` 为该玩家在本步内的裁判得分增量，按玩家编号排列，不做奖励塑形或归一化。完成私人任务获得对应任务分，同步完成公共任务按规则平分；没有得分变化时为 `0.0`。扣血、死亡、复位本身不改变得分，因此不额外产生奖励。观测中的 `game.score` 仍为累计得分。
+
+`done` 在达到比赛时长时为 `True`，该步的奖励照常返回。旧的 `done = arena.step(actions)` 调用需改为上述解包形式；忽略返回值的调用不受影响。独立选手包使用相同接口，完整示例见 [选手包说明](../participant/README.md#直接调用环境与奖励)。
+
 ## 机器人匹配、关节重排与编译
 
 网页清单可声明 `robot_id=unitree_g1_29dof`、`control_mode=joint_position`、`joint_unit=rad`。旧模板省略时按当前统一 G1 接口处理，明确不匹配的声明会被拒绝。
