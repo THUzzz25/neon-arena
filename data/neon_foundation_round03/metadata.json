@@ -1,0 +1,464 @@
+{
+  "format": "neon-foundation-onnx-v1",
+  "checkpoint_sha256": "9ff8026055e46e98f323481ecaca30dd41d6b0d05d0ccbdd8caa7768a873a92d",
+  "onnx_sha256": "9165bc32cf652eca9b06f8996bcf9e089bbc86a61392283866581550decaf68e",
+  "model_config": {
+    "gait_spec": {
+      "hidden_sizes": [
+        512,
+        256,
+        128
+      ],
+      "eps": 1e-05
+    },
+    "residual_scale": 0.12,
+    "wrist_residual_scale": 8.0,
+    "command_limits": [
+      0.25,
+      0.1,
+      0.3
+    ],
+    "freeze_gait": true,
+    "wrist_error_limits": [
+      0.08,
+      0.05
+    ]
+  },
+  "calibration": {
+    "dof_names": [
+      "left_hip_pitch_joint",
+      "left_hip_roll_joint",
+      "left_hip_yaw_joint",
+      "left_knee_joint",
+      "left_ankle_pitch_joint",
+      "left_ankle_roll_joint",
+      "right_hip_pitch_joint",
+      "right_hip_roll_joint",
+      "right_hip_yaw_joint",
+      "right_knee_joint",
+      "right_ankle_pitch_joint",
+      "right_ankle_roll_joint",
+      "waist_yaw_joint",
+      "waist_roll_joint",
+      "waist_pitch_joint",
+      "left_shoulder_pitch_joint",
+      "left_shoulder_roll_joint",
+      "left_shoulder_yaw_joint",
+      "left_elbow_joint",
+      "left_wrist_roll_joint",
+      "left_wrist_pitch_joint",
+      "left_wrist_yaw_joint",
+      "right_shoulder_pitch_joint",
+      "right_shoulder_roll_joint",
+      "right_shoulder_yaw_joint",
+      "right_elbow_joint",
+      "right_wrist_roll_joint",
+      "right_wrist_pitch_joint",
+      "right_wrist_yaw_joint"
+    ],
+    "kp": [
+      40.179238471,
+      99.098427777,
+      40.179238471,
+      99.098427777,
+      28.501246196,
+      28.501246196,
+      40.179238471,
+      99.098427777,
+      40.179238471,
+      99.098427777,
+      28.501246196,
+      28.501246196,
+      40.179238471,
+      28.501246196,
+      28.501246196,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      16.778327481,
+      16.778327481,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      14.250623098,
+      16.778327481,
+      16.778327481
+    ],
+    "kd": [
+      2.557889765,
+      6.308801854,
+      2.557889765,
+      6.308801854,
+      1.814445687,
+      1.814445687,
+      2.557889765,
+      6.308801854,
+      2.557889765,
+      6.308801854,
+      1.814445687,
+      1.814445687,
+      2.557889765,
+      1.814445687,
+      1.814445687,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      1.068141502,
+      1.068141502,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      0.907222843,
+      1.068141502,
+      1.068141502
+    ],
+    "home": [
+      -0.312,
+      0.0,
+      0.0,
+      0.669,
+      -0.363,
+      0.0,
+      -0.312,
+      0.0,
+      0.0,
+      0.669,
+      -0.363,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.2,
+      0.2,
+      0.0,
+      0.6,
+      0.0,
+      0.0,
+      0.0,
+      0.2,
+      -0.2,
+      0.0,
+      0.6,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "action_scale": 0.25,
+    "source": "amazon-far/holosoma@78aeb23ed478de980c43e979f5e70be1b9699187",
+    "joint_limits": [
+      [
+        -2.5307,
+        2.8798
+      ],
+      [
+        -0.5236,
+        2.9671
+      ],
+      [
+        -2.7576,
+        2.7576
+      ],
+      [
+        -0.087267,
+        2.8798
+      ],
+      [
+        -0.87267,
+        0.5236
+      ],
+      [
+        -0.2618,
+        0.2618
+      ],
+      [
+        -2.5307,
+        2.8798
+      ],
+      [
+        -2.9671,
+        0.5236
+      ],
+      [
+        -2.7576,
+        2.7576
+      ],
+      [
+        -0.087267,
+        2.8798
+      ],
+      [
+        -0.87267,
+        0.5236
+      ],
+      [
+        -0.2618,
+        0.2618
+      ],
+      [
+        -2.618,
+        2.618
+      ],
+      [
+        -0.52,
+        0.52
+      ],
+      [
+        -0.52,
+        0.52
+      ],
+      [
+        -3.0892,
+        2.6704
+      ],
+      [
+        -1.5882,
+        2.2515
+      ],
+      [
+        -2.618,
+        2.618
+      ],
+      [
+        -1.0472,
+        2.0944
+      ],
+      [
+        -1.97222,
+        1.97222
+      ],
+      [
+        -1.61443,
+        1.61443
+      ],
+      [
+        -1.61443,
+        1.61443
+      ],
+      [
+        -3.0892,
+        2.6704
+      ],
+      [
+        -2.2515,
+        1.5882
+      ],
+      [
+        -2.618,
+        2.618
+      ],
+      [
+        -1.0472,
+        2.0944
+      ],
+      [
+        -1.97222,
+        1.97222
+      ],
+      [
+        -1.61443,
+        1.61443
+      ],
+      [
+        -1.61443,
+        1.61443
+      ]
+    ]
+  },
+  "source_metadata": {
+    "arguments": {
+      "data": [
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4",
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4",
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger",
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger",
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger",
+        "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger"
+      ],
+      "output": "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/training",
+      "checkpoint": "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/training/step_006000.pt",
+      "onnx": "third_party/holosoma/fastsac_g1_29dof.onnx",
+      "steps": 6000,
+      "batch_size": 128,
+      "lr": 0.0001,
+      "seed": 39202,
+      "device": "cuda:0",
+      "save_every": 500,
+      "unfreeze_gait": false,
+      "positive_fraction": 0.02,
+      "wrist_weight": 4.0,
+      "wrist_error_limits": [
+        "0.08",
+        "0.05"
+      ],
+      "wrist_residual_scale": 8.0,
+      "randomize_remaining": true,
+      "randomize_elapsed": true
+    },
+    "train_files": [
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9201-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9301-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9201-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9202-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9002-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9402-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9200-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed804-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed702-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed751-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed801-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9302-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed753-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9202-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9000-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9200-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed701-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed752-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9001-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed705-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed803-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9400-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9000-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9300-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9400-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9300-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9402-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed703-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed704-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9001-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed706-swap0.npz"
+    ],
+    "validation_files": [
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed754-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9302-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9301-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed802-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9401-swap0.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9002-swap1.npz",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9401-swap1.npz"
+    ],
+    "data_sha256": {
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed754-swap1.npz": "91a28422f97f163d67273ee012a960dda59c8bfd1dee5f70ed4ed3d3eafc46d5",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9302-swap1.npz": "dc5e2174490445e9eccc789374fc2e68c4b7c6cfc4790b53114efd5de2981f8d",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9301-swap1.npz": "61c07333b4d82dd36d9c398f720293e589a94d58bb1b096e85fd57c66ce458a3",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed802-swap0.npz": "412291866c50735cef0c8bb804930b4736879586d96049d7674480b287b59f26",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9401-swap0.npz": "96e89095ada064ba4f6414f108512f4c00df873079cd8f2e1d22d1b79cd91ff2",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9002-swap1.npz": "2685006ae1066d84875497d563689dcf3640e39029413bd65af34e51eb5e7307",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9401-swap1.npz": "4abc2b1bad8e1011f02a896adb2b3e49654ca2fca2af314c4405a42932f1bc49",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9201-swap0.npz": "cd0892ef28f19286deea3356bc9e311dda1d0fe98f483a70c1cb177022ab84a9",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9301-swap0.npz": "be94652411112772cf6c31c407f5a40603955cf1ec1b3f00344ed207257dd12c",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9201-swap1.npz": "e7b076015316e2f3c0237a370b60bc39b1b3f90ad8c7b9816812ff165f1d4a9f",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9202-swap0.npz": "313e68787f63680df777f51f083164077e3a8ff19e35d6ced6ccac1d8342fd69",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9002-swap0.npz": "db02900e923cdaf2ea8d01fa3453a96517e141cd87f0eea250624c7d472dd2b9",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9402-swap1.npz": "7eca89bf785cc6c6c199818e53d4528196a482fd03148293c230a887ac33c8df",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9200-swap0.npz": "fdec7cef749718214f6cb553ce309726a7450f0a4d848f56366e1a5b9ea142f3",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed804-swap0.npz": "dee7c220037e97170e4ea2fd6d15ced5ae6f530fd7583f6fb3e9f66b1618bc4e",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed702-swap0.npz": "c6a9957036958970e381ddaf1fcd06384db7ed1e085a9c3cf448b0d657fd459e",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed751-swap1.npz": "21785a37210f4067c21a8c2944e7d7a5de767f6a83136f6a4dba14ebbde33472",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed801-swap0.npz": "377e222e33f2fd85705e92c12d9620cfc4d39871e7b389ec46bda75acee4874f",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9302-swap0.npz": "976550f6ad482915448d98424b578bcab800477fae84badb6abd09fc2cf53e14",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed753-swap1.npz": "3cb2bef8702654ad1346dca3a3ce90056888b8e51ab8c4fecf9b0c6b810ba53c",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9202-swap1.npz": "8dd62ed53a536b19ce2570cd778c0226f72bea32b59e5ce7e3c410dd50c6ecca",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9000-swap0.npz": "bd2c7d1d74fbc7b45360090b1d32a9a16c88dff041a060607e19d2c023bbe216",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_01/dagger/room-legacy-vision-seed9200-swap1.npz": "c89828272d068010796b3549fe8dfd6bd189f28b8bf77697e18a10cbd7e0386a",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed701-swap0.npz": "869ba71c48950056da6b81fb5306cbb3cb961449b1ec57bfc8da59352f3e0ece",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed752-swap1.npz": "04eea82e8ee36bc9502beb035c594023046a748259d3f7839caa6a58f0d853a7",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9001-swap1.npz": "dfbb9799107691da55de3e34dff158fd3b151eed2473ce524ae0e9958c75904f",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed705-swap0.npz": "d5de2b5b92f21cb00f79f6df3064a8da34ec014f752235a58dac86cf81879430",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/dagger_goal_v4/room-legacy-vision-seed803-swap0.npz": "c24eb97c4cf1136d581bd0c84d4ecc25a4e772a58abdde38635070992d742faa",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9400-swap0.npz": "efa809ffcdc68f7cf3e1063c89c6b3c1c5136c42f9f3b6fbe8f6eaf1dcec52db",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9000-swap1.npz": "48edadccee1f339370bb66414d19cc3a6a2fb3b521ac824b3003543259a2eb9f",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9300-swap1.npz": "988d30e00615865e7ee79509db2cd7d5ff32f29e5292f1a4360959d1a99351bb",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9400-swap1.npz": "41f57483a95365fe9b501c41e497b4415f76d4110e8fa8fb2f872af2c64f30c9",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_02/dagger/room-legacy-vision-seed9300-swap0.npz": "862cf3cc122fdd6fc83984b10fff5ee0f1b1ffb683db08e8c33177ccf620ca28",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v2/round_03/dagger/room-legacy-vision-seed9402-swap0.npz": "a166a4d9913e9d367e2042194da914a728530b199eee4105642b294579eaa5ab",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed703-swap0.npz": "689e20e7a84691fbc10c9ff3c0efb055cca15b4033a30970daf788c86d9095f7",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed704-swap0.npz": "7f18ed9bb70163af22d1c86079db40b9449d6504c117f201da7abfe9b2862911",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/iteration_v1/round_01/dagger/room-legacy-vision-seed9001-swap0.npz": "7ec3a3d45d812198b7876431b522880220ca6ac2a0c5617039fbc9d898861b8f",
+      "/share/public-local/caoxuanhe/neon-arena-foundation/artifacts/foundation/teacher_goal_v4/room-legacy-vision-seed706-swap0.npz": "ebc3427d8178be6d0a75d82f38a06a3a78753673bca344c7fd5f1b8aa419d60a"
+    },
+    "training_frames": 30918,
+    "validation_frames": 7000,
+    "positive_fire_labels": 1407.0,
+    "gait_parity": null,
+    "encoder_sha256": "312f2823022f8225bb35838a8f0f1178681fad8027de2fdbbf7cffeb642c7cf4",
+    "source_sha256": {
+      "__init__.py": "f889434c72cda308078fdea21e95ba175e59d9c59260d1a20fdadb1f18615010",
+      "export.py": "b45b5b0c1698e6dc09e9f76c0ff74773edb028d26c274805ead5de00fc9c91c8",
+      "iterate.py": "9a4b343c783dc036b70a13a1b1df7ee9a44def87e4f8f05316edff3d625e1de8",
+      "model.py": "e72a5d7a7fbfe3b13565f490a4d0450a5f9520cb20b6322d12c9b51a47601853",
+      "onnx_policy.py": "a1463116df95c9eb111d73d159b5181998d36bd99537b1d722c96206b0d0eb04",
+      "policy.py": "312f2823022f8225bb35838a8f0f1178681fad8027de2fdbbf7cffeb642c7cf4",
+      "rollout.py": "79b225b1aee1ef1944c95bb9e53cd3df5f99768530faf139f59df155aa1c6abe",
+      "train.py": "4a4ab5ea6b86eb74a492e31c9a282186a368feaf1841ac220a143ac0cfd2ed9a"
+    },
+    "torch": "2.10.0+cu126",
+    "cuda_device": "NVIDIA GeForce RTX 3090",
+    "stage": "behavior_cloning",
+    "acceptance": "unverified_requires_closed_loop",
+    "step": 6000,
+    "metrics": {
+      "step": 6000,
+      "wall_seconds": 186.2793344631791,
+      "train": {
+        "loss": 1.3146926164627075,
+        "joint_mse": 0.01962936855852604,
+        "command_mse": 0.006771459709852934,
+        "fire_bce": 0.07842499017715454,
+        "nonwrist_residual": 1.9335595879965695e-06,
+        "wrist_mse": 0.2842576205730438,
+        "wrist_goal_mse": 0.17032751441001892,
+        "fire_predicted_rate": 0.0234375,
+        "fire_label_rate": 0.046875
+      },
+      "validation": {
+        "loss": 2.718501567840576,
+        "joint_mse": 0.03969086706638336,
+        "command_mse": 0.023862244561314583,
+        "fire_bce": 0.18275806307792664,
+        "nonwrist_residual": 1.7352393797409604e-06,
+        "wrist_mse": 0.5740152597427368,
+        "wrist_goal_mse": 0.4012601375579834,
+        "fire_predicted_rate": 0.0166015625,
+        "fire_label_rate": 0.083984375
+      }
+    }
+  },
+  "export_validation": {
+    "samples": 64,
+    "input_source": "public_episode_observations",
+    "absolute_tolerance": 5e-05,
+    "max_abs_error": {
+      "action": 2.1457672119140625e-06,
+      "command": 3.3155083656311035e-07,
+      "fire_logit": 6.67572021484375e-06,
+      "gait_action": 2.1457672119140625e-06
+    },
+    "fire_decision_mismatches": 0,
+    "onnx_inference_ms_mean": 0.502833048813045,
+    "onnx_inference_ms_p95": 0.7624775171279907,
+    "passed": true,
+    "closed_loop_acceptance": "not_checked_by_export"
+  },
+  "input_names": [
+    "proprio",
+    "image",
+    "tasks",
+    "task_mask",
+    "game"
+  ],
+  "output_names": [
+    "action",
+    "command",
+    "fire_logit",
+    "gait_action"
+  ],
+  "batch_size": 1,
+  "control_hz": 50,
+  "acceptance": "unverified_requires_closed_loop"
+}

@@ -11,6 +11,7 @@ dependencies = ["mujoco==3.3.7", "numpy>=2.1,<3", "Pillow>=11"]
 
 [project.optional-dependencies]
 demo = ["onnxruntime>=1.20,<2"]
+train = ["torch>=2.7,<2.11", "onnx>=1.17,<2", "onnxruntime>=1.20,<2"]
 test = ["pytest>=8", "fastapi==0.165.0", "uvicorn==0.54.0", "httpx==0.28.1"]
 web = ["fastapi==0.165.0", "uvicorn==0.54.0"]
 
@@ -19,7 +20,7 @@ embodied-arena = "embodied_arena.cli:main"
 arena-web = "embodied_arena.platform.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["embodied_arena*"]
+include = ["embodied_arena*", "foundation*"]
 
 [tool.setuptools.package-data]
 "embodied_arena.platform" = ["static/*"]
