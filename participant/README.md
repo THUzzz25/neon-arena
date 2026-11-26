@@ -42,6 +42,32 @@ Linux/macOS 将 `.venv/Scripts/python.exe` 换成 `.venv/bin/python`。也可以
 
 策略在本地同一进程运行，无权限隔离和超时终止，只适合运行自己信任的代码。
 
+## 直接调用环境与奖励
+
+本地训练可直接调用 `Arena.step(actions)`，返回 `(rewards, done)`。`actions` 按玩家编号提供两个动作，`rewards` 是对应玩家的两个浮点奖励，`done` 表示是否到达比赛时长。下一步观测通过 `arena.observation(pid)` 获取。
+
+原始奖励为本步裁判得分增量：`rewards[pid] = 本步结束得分 - 本步开始得分`。完成任务时获得配置中的任务分，同步命中公共目标时平分；没有得分变化时返回 `0.0`。奖励不做归一化或额外塑形，扣血、死亡和复位按现有规则不额外增减奖励；结束的那一步仍返回该步奖励。`observation["game"]["score"]` 保持为累计得分。
+
+```python
+from embodied_arena.config import MatchConfig
+from embodied_arena.engine import Arena
+from policy import Policy
+
+arena = Arena(MatchConfig(scene="room", duration=5.0), cameras=False)
+policies = [Policy(player_id=pid) for pid in range(2)]
+try:
+    done = False
+    while not done:
+        observations = [arena.observation(pid) for pid in range(2)]
+        actions = [policies[pid].act(observations[pid]) for pid in range(2)]
+        rewards, done = arena.step(actions)
+        # rewards[0] / rewards[1] 是本次动作产生的原始奖励。
+finally:
+    arena.close()
+```
+
+旧代码若使用 `done = arena.step(actions)`，需改为 `rewards, done = arena.step(actions)`；仅调用并忽略返回值的代码无需修改。
+
 ## 练习、结果与回放
 
 ```powershell
